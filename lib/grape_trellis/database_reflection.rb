@@ -1,3 +1,4 @@
+require_relative 'database_reflection/foreign_key_naming_convention'
 require_relative 'database_reflection/foreign_key_discovery'
 require_relative 'database_reflection/foreign_key_info'
 require_relative 'database_reflection/relation'

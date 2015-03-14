@@ -12,32 +12,24 @@ module Grape
             (
             ["class #{model_class_name} < Sequel::Model"] +
               resource.children.map { |fk| "  #{one_to_many(fk)}" } +
-              resource.parents.map  { |fk| "  #{many_to_one(fk)}" } +
+              resource.parents.map { |fk| "  #{many_to_one(fk)}" } +
               (options[:with_grape_entities] ? code_for_grape_entity : []) +
               ['end']
             ).join("\n")
           end
 
           def many_to_one(fk)
-            ass_name, class_name = if conventional_ass = ForeignKeyInfo.association_by_convention(fk.column)
-                                     [conventional_ass, nil]
-                                   else # e.g. broadcasts, created_by, users, id => many_to_one: :created_by, class: :User
-                                     [fk.column, model_class_name(fk.foreign_table)]
-            end
-
-            "many_to_one :#{ass_name}#{class_name ? ":#{class_name}" : ''}#{unconventional_fk_spec(fk)}#{unconventional_pk_spec(fk)}"
+            assoc_spec = fk.conventional_association || "#{fk.unconventional_association}, class: :#{model_class_name(fk.foreign_table)}, key: :#{fk.column}"
+            "many_to_one :#{assoc_spec}#{unconventional_pk_spec(fk)}"
           end
 
           def one_to_many(fk)
-            "one_to_many :#{fk.table}#{unconventional_fk_spec(fk)}#{unconventional_pk_spec(fk)}"
-          end
-
-          def unconventional_fk_spec(fk)
-            fk.unconventional_key ? ", key: #{fk.unconventional_key}" : ''
+            assoc_spec = fk.conventional_association ? fk.table : "#{fk.unconventional_association}_#{fk.table}, class: :#{model_class_name(fk.table)}, key: :#{fk.column}"
+            "one_to_many :#{assoc_spec}#{unconventional_pk_spec(fk)}"
           end
 
           def unconventional_pk_spec(fk)
-            fk.unconventional_primary_key ? ", primary_key: #{fk.unconventional_primary_key}" : ''
+            fk.unconventional_primary_key ? ", primary_key: :#{fk.unconventional_primary_key}" : ''
           end
 
           def require_code
