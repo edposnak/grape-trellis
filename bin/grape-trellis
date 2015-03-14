@@ -1,12 +1,25 @@
 #!/usr/bin/env ruby
 
-# add lib to load path (like including the gem does) when developing the gem
-if File.exists?(File.join(File.expand_path('../..', __FILE__), '.git'))
-  lib_path = File.expand_path('../../lib', __FILE__)
-puts "lib_path = #{lib_path}"
-  $:.unshift(lib_path)
+ARGV << '--help' if ARGV.empty?
+
+aliases = {
+  'n'  => 'new',
+  'g'  => 'generate',
+  'd'  => 'destroy',
+}
+
+command = ARGV.shift
+command = aliases[command] || command
+
+case command
+
+when 'generate'
+  puts "wohoo generate"
+
+when 'destroy'
+
+
+else
+  puts "ERROR: invalid command: '#{command}'"
 end
 
-f = File.join($:.first, 'grape_trellis/cli.rb')
-puts f, File.exists?(f)
-require 'grape_trellis/cli'

@@ -1,5 +1,4 @@
 # Require the base generator classes
-require_relative 'generators/resource'
 require_relative 'generators/generator'
 require_relative 'generators/code_generator'
 

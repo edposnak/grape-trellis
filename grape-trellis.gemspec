@@ -19,14 +19,25 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
+  spec.add_dependency 'abstract_method'
+  spec.add_dependency 'activesupport'
+
+  # Need sequel and pg for database reflection
+  spec.add_dependency 'sequel'
+  spec.add_dependency 'pg'
+  spec.add_dependency 'sequel_pg'  # require: 'sequel'
+
+  # May need these, maybe not
   # spec.add_dependency 'grape'
   # spec.add_dependency 'grape-entity'
-  # spec.add_dependency 'sequel'
-  # spec.add_dependency 'pg'
-  # spec.add_dependency 'sequel_pg'  # require: 'sequel'
-  spec.add_dependency 'abstract_method'
+
   spec.add_dependency 'thor'
 
-  spec.add_development_dependency "bundler", "~> 1.7"
-  spec.add_development_dependency "rake", "~> 10.0"
+  #############################################################################
+  # Development dependencies
+
+  spec.add_development_dependency 'bundler', '~> 1.7'
+  spec.add_development_dependency 'rake', '~> 10.0'
+  spec.add_development_dependency 'minitest'
+
 end

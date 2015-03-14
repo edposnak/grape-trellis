@@ -1,7 +1,7 @@
 module Grape
   module Trellis
     module Generators
-      # Base class for all types of Resources
+      # Base class for all types of CodeGenerators
       class CodeGenerator
         abstract_method :filename, :code, :require_code
 

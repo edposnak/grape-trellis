@@ -1,8 +1,8 @@
 module Grape
   module Trellis
-    module Generators
-      # Base class for all types of Resources
-      class Resource
+    module DatabaseReflection
+
+      class Relation
         attr_reader :table, :columns
         attr_reader :children, :parents
 
@@ -19,10 +19,19 @@ module Grape
           columns.map(&:to_s)
         end
 
-        def belongs_to(parent)
-          parent.children << self
-          self.parents << parent
+        def many_to_one(foreign_key)
+          self.parents << foreign_key
         end
+
+        def one_to_many(foreign_key)
+          self.children << foreign_key
+        end
+
+        def many_to_many(other_relation, foreign_key)
+
+        end
+
+
 
       end
     end
