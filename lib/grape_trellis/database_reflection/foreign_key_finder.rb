@@ -1,7 +1,7 @@
 module Grape
   module Trellis
     module DatabaseReflection
-      module ForeignKeyDiscovery
+      module ForeignKeyFinder
 
         # Returns the set of foreign key constraints on the given table residing in the given db
         # @param [Relation] relation the relation to search for constraints
@@ -9,7 +9,7 @@ module Grape
         # @return [Array<ForeignKeyInfo>] info for foreign keys in the given table and db
         #
         def find_by_constraints(relation, db)
-          db[constraint_query(relation.table)].all.map { |attrs| ForeignKeyInfo.for(attrs) }
+          db[constraint_query(relation.table)].all.map { |attrs| ForeignKeyInfo.from_constraint(attrs) }
         end
 
         # Returns a set of possible foreign keys based on columns in this relation matching the naming convention and
@@ -20,7 +20,7 @@ module Grape
         #
         def find_by_naming_conventions(relation, schema)
           relation.column_names.map do |column_name|
-            if matched_table = ForeignKeyInfo.referenced_table_by_convention(column_name)
+            if matched_table = ForeignKeyNamingConvention.referenced_table_by_convention(column_name)
               ForeignKeyInfo.new(nil, relation.table, column_name, matched_table, :id) if schema.has_table?(matched_table)
             end
           end.compact
