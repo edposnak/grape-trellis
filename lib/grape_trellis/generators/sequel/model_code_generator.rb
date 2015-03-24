@@ -33,23 +33,12 @@ module Grape
           #   many_to_many :badges, left_key: :user_id, right_key: :badge_id, join_table: :badge_users
           #
           def code_for_join_association(join_ass)
-
-
             ass_to_me, ass_to_other = join_ass.direct_associations
-
-            # if ass_to_me.child_table == 'item_assignments' && ass_to_me.parent_table == 'groups'
 
             r = "#{join_ass.type} :#{join_ass.name}"
             r << ", class: :#{model_class_name(join_ass.associated_table)}" unless join_ass.name == join_ass.associated_table
-
-
-            def conventional_foreign_key_for_name?
-              name == ForeignKeyNamingConvention.parent_table_for(foreign_key)
-            end
-
             r << ", right_key: :#{ass_to_other.foreign_key}" unless join_ass.name == join_ass.associated_table && ass_to_other.conventional_foreign_key?
             r << ", left_key: :#{ass_to_me.foreign_key}" unless ass_to_me.conventional_foreign_key?
-
             r << ", join_table: :#{join_ass.child_table}"
             # primary_key always defaults to the primary key of the referenced table
             r
