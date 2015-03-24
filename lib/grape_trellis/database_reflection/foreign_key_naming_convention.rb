@@ -2,67 +2,48 @@ module Grape
   module Trellis
     module DatabaseReflection
       module ForeignKeyNamingConvention
+        PRIMARY_KEY       = 'id' # by convention, primary keys are named id
+        FOREIGN_KEY_REGEX = /_id$/ # by convention, foreign keys are named <parent_table_singular>_id
 
-        extend ActiveSupport::Concern
+        module_function
 
-        FOREIGN_KEY_REGEX = /_id$/ # by convention, foreign keys are named <foreign_table_singular>_id
-
-        # included do
-        #   extend ClassMethods
-        # end
-
-        def unconventional_primary_key
-          foreign_column if foreign_column != 'id'
+        # Returns the name of a possibly referenced table if the given possible_foreign_key follows the naming convention,
+        # otherwise returns nil
+        #
+        # Example: parent_table_for('group_id') => 'groups'
+        #
+        # @param [String|Symbol] possible_foreign_key name of the possibly referencing column
+        # @return [String|NilClass] name of the possibly referenced table if found by convention
+        #
+        def parent_table_for(possible_foreign_key)
+          possible_foreign_key = possible_foreign_key.to_s
+          possible_foreign_key =~ FOREIGN_KEY_REGEX && singular_association_name(possible_foreign_key).pluralize.freeze
         end
 
-        # Returns the name of a referenced association if the foreign key column name references the foreign table
-        # according to the naming convention, otherwise returns nil
-        #
+        # Returns a many_to_one association name based on the given foreign_key according to the naming convention
         # Examples:
-        #   ForeignKeyInfo.new('users', 'group_id', 'groups', 'id').conventional_association => 'group'
-        #   ForeignKeyInfo.new('users', 'team_id', 'groups', 'id').conventional_association => nil
+        #   to_association('group_id') => 'group'
+        #   to_association('team_id') => 'team'
+        #   to_association('created_by') => 'created_by'
         #
-        # @param [String|Symbol] column_name the name of the referencing column
-        # @return [String|NilClass] the name of the referenced association if found by convention
+        def singular_association_name(foreign_key)
+          if foreign_key =~ FOREIGN_KEY_REGEX
+            foreign_key[0...foreign_key.index(FOREIGN_KEY_REGEX)]
+          else
+            foreign_key
+          end
+        end
+
+        # Returns a one_to_many association name based on the given foreign_key according to the naming convention
+        # Examples:
+        #   to_association('group_id') => 'groups'
+        #   to_association('team_id') => 'teams'
+        #   to_association('created_by') => 'created_bies'
         #
-        def conventional_association
-          if foreign_table == self.class.referenced_table_by_convention(column)
-            self.class.to_association(column)
-          end
+        def plural_association_name(foreign_key)
+          singular_association_name(foreign_key).pluralize
         end
 
-        def unconventional_association
-          self.class.to_association(column)
-        end
-
-
-        module ClassMethods
-          # Returns the name of a possibly referenced table if the given column_name follows the naming convention,
-          # otherwise returns nil
-          #
-          # Example: referenced_table_by_convention('group_id') => 'groups'
-          #
-          # @param [String|Symbol] column_name name of the possibly referencing column
-          # @return [String|NilClass] name of the possibly referenced table if found by convention
-          #
-          def referenced_table_by_convention(column_name)
-            column_name = column_name.to_s
-            column_name =~ FOREIGN_KEY_REGEX && to_association(column_name).pluralize.freeze
-          end
-
-          # Returns the given column name as an association according to the naming convention
-          # Examples:
-          #   to_association('group_id') => 'group'
-          #   to_association('team_id') => 'team'
-          #   to_association('created_by') => 'created_by'
-          #
-          def to_association(column_name)
-            column_name = column_name.to_s
-            return column_name unless column_name =~ FOREIGN_KEY_REGEX
-            column_name[0...column_name.index(FOREIGN_KEY_REGEX)]
-          end
-
-        end
       end
     end
   end

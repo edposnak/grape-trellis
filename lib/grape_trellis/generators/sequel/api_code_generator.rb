@@ -4,24 +4,54 @@ module Grape
       module Sequel
         class APICodeGenerator < CodeGenerator
 
+          class << self
+            def initial_require_code
+              ['class API < Grape::API'] +
+              ["  version 'v1', using: :header, vendor: 'Grape API' # using: :path"] +
+              ['  format :json'] +
+              ['  prefix :api'] +
+              ['end'] +
+              ["Dir[File.join(File.dirname(__FILE__), 'api/*.rb')].each {|f| require f }"]
+            end
+          end
+
           def filename
             "#{resource.table_name.underscore}.rb"
           end
 
-
           def code
-            methods = [:index, :show]
+            res = resource.table_name
             (
-            ['class API < Grape::API'] +
-              ["  resource :#{resource.table_name} do"] +
+              ['class API < Grape::API'] +
+              ["  resource :#{res} do"] +
+              ['       '] +
+              ['    helpers do'] +
+              ["      def #{res}"] +
+              ["        GrapePGJSON.resource :#{res}"] +
+              ['      end'] +
+              ['    end'] +
+              ['       '] +
+              ['    #########################################################################'] +
+              ['    # REST endpoints'] +
+              ["    desc 'index'"] +
+              ["    get '/' do"] +
+              ['    end'] +
+              ['       '] +
+              ["    desc 'show'"] +
+              ["    params { requires :id, type: Integer, desc: 'The unique id of the #{res}' }"] +
+              ["    get '/:id' do"] +
+              ['    end'] +
+              ['       '] +
               ['  end'] +
               ['end']
             ).join("\n")
           end
 
           def require_code
-            "require 'api/#{filename}'"
+            []
+            # "require 'api/#{filename}'"
           end
+
 
         end
       end

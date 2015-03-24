@@ -8,32 +8,55 @@ module Grape
             "#{model_class_name.underscore}.rb"
           end
 
+          def require_preamble
+            nil
+          end
+
           def code
             (
             ["class #{model_class_name} < Sequel::Model"] +
-              resource.children.map { |fk| "  #{one_to_many(fk)}" } +
-              resource.parents.map { |fk| "  #{many_to_one(fk)}" } +
+              resource.direct_associations.sort_by(&:name).map { |ass| "  #{code_for_association(ass)}" } +
+              resource.join_associations.sort_by(&:name).map { |ass| "  #{code_for_join_association(ass)}" } +
               (options[:with_grape_entities] ? code_for_grape_entity : []) +
               ['end']
             ).join("\n")
           end
 
-          def many_to_one(fk)
-            assoc_spec = fk.conventional_association || "#{fk.unconventional_association}, class: :#{model_class_name(fk.foreign_table)}, key: :#{fk.column}"
-            "many_to_one :#{assoc_spec}#{unconventional_pk_spec(fk)}"
+          def code_for_association(ass)
+            r = "#{ass.type} :#{ass.name}"
+            r << ", class: :#{model_class_name(ass.associated_table)}, key: :#{ass.foreign_key}" unless ass.conventional_foreign_key?
+            # primary_key always defaults to the primary key of the referenced table
+            r
           end
 
-          def one_to_many(fk)
-            assoc_spec = fk.conventional_association ? fk.table : "#{fk.unconventional_association}_#{fk.table}, class: :#{model_class_name(fk.table)}, key: :#{fk.column}"
-            "one_to_many :#{assoc_spec}#{unconventional_pk_spec(fk)}"
-          end
+          # Example:
+          #   many_to_many :badges, left_key: :user_id, right_key: :badge_id, join_table: :badge_users
+          #
+          def code_for_join_association(join_ass)
 
-          def unconventional_pk_spec(fk)
-            fk.unconventional_primary_key ? ", primary_key: :#{fk.unconventional_primary_key}" : ''
+
+            ass_to_me, ass_to_other = join_ass.direct_associations
+
+            # if ass_to_me.child_table == 'item_assignments' && ass_to_me.parent_table == 'groups'
+
+            r = "#{join_ass.type} :#{join_ass.name}"
+            r << ", class: :#{model_class_name(join_ass.associated_table)}" unless join_ass.name == join_ass.associated_table
+
+
+            def conventional_foreign_key_for_name?
+              name == ForeignKeyNamingConvention.parent_table_for(foreign_key)
+            end
+
+            r << ", right_key: :#{ass_to_other.foreign_key}" unless join_ass.name == join_ass.associated_table && ass_to_other.conventional_foreign_key?
+            r << ", left_key: :#{ass_to_me.foreign_key}" unless ass_to_me.conventional_foreign_key?
+
+            r << ", join_table: :#{join_ass.child_table}"
+            # primary_key always defaults to the primary key of the referenced table
+            r
           end
 
           def require_code
-            "autoload #{model_class_name}, 'models/#{filename}'"
+            ["require 'models/#{filename}'"]
           end
 
 
@@ -43,8 +66,8 @@ module Grape
             [''] +
               ["  def entity ; Entity.new(self) ; end"] +
               ["  class Entity < Grape::Entity"] +
-              ["    expose #{resource.columns.map { |cn| ":#{cn}" }.join(', ')}"] +
-              resource.children.map { |fk| "    # expose :#{fk.table}, using: ::#{model_class_name(fk.table)}::Entity" } +
+              ["    expose #{resource.column_names.map { |cn| ":#{cn}" }.join(', ')}"] +
+              resource.child_associations.map { |ass| "    # expose :#{ass.child_table}, using: ::#{model_class_name(ass.child_table)}::Entity" } +
               ['  end']
           end
 

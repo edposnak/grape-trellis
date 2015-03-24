@@ -6,47 +6,45 @@ module Grape
           # Generates code by reflecting on the database tables
 
           # Example
-          # FromDatabaseUrl.new.generate 'postgres://smcc@localhost:5432/smcc_development', './lib', with_grape_entities: true
+           #
+           # Grape::Trellis::Generators::Sequel::FromDatabaseUrl.new.generate 'postgres://smcc@localhost:5432/smcc_development', 'lib', with_grape_entities: true, exclude_tables: /migration/
 
           # @param [String] database_url specifies database to connect to and reflect on
           # @param [String] target_dir where to put the generated code
           # @param [Hash] options
+          # @option options types list of types to generate, default is [:api, :models]
           # @option options with_grape_entities add Grape::Entity presenters to generated models
-          # @option options db_reflection_options options to pass to reflect_on_database (exclude_tables_regex, naming_conventions, etc.)
+          # @option options exclude_tables list or regex defining tables to exclude from reflection
           #
           def generate(database_url, target_dir, options={})
-            database_url or fail InvalidArgumentError.new("database_url must be provided")
-            target_dir or fail InvalidArgumentError.new("target_dir must be provided")
-
-            generate_options = options.select {|k, _| VALID_GENERATE_OPTIONS.include? k}
-            options[:db_reflection_options] ||= {}
-
-            # TODO move this outside generate
-            options[:db_reflection_options][:exclude_tables_regex] ||= /migration/ # exclude rails schema_migrations etc.
+            generate_options   = options.slice(*VALID_GENERATE_OPTIONS)
+            reflection_options = options.slice(*VALID_REFLECTION_OPTIONS)
 
             reflector = DatabaseReflection::Reflector.new(database_url)
-            relations = reflector.reflect_on_database(options[:db_reflection_options])
+            relations = reflector.reflect_on_database(reflection_options)
+            types_to_generate = Array(options[:types] || [:models, :api])
 
-            [:models, :api].each do |type|
-              target_dir = File.join(target_dir, type.to_s)
-              FileUtils.mkdir_p(target_dir)
+            types_to_generate.each do |type|
+              subdir = File.join(target_dir, type.to_s)
+              FileUtils.mkdir_p(subdir)
 
               code_generator_class = code_generator_class_for(type)
-              require_file_code    = []
+              require_file_code    = code_generator_class.initial_require_code rescue []
 
               relations.each do |relation|
                 code_generator = code_generator_class.new(relation, generate_options)
-                File.open(File.join(target_dir, "#{code_generator.filename}"), 'w') { |file| file.puts code_generator.code }
-                require_file_code << code_generator.require_code
+                File.open(File.join(subdir, "#{code_generator.filename}"), 'w') { |file| file.puts code_generator.code }
+                require_file_code += code_generator.require_code
               end
 
-              File.open("#{target_dir}.rb", 'w') { |file| file.puts require_file_code.join("\n") }
+              File.open("#{subdir}.rb", 'w') { |file| file.puts require_file_code.join("\n") }
             end
           end
 
           private
 
-          VALID_GENERATE_OPTIONS = [:with_grape_entities]
+          VALID_GENERATE_OPTIONS   = [:with_grape_entities]
+          VALID_REFLECTION_OPTIONS = [:exclude_tables]
 
           def code_generator_class_for(type)
             case type
