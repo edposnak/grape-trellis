@@ -7,7 +7,7 @@ module Grape::Trellis
       class TestModelCodeGenerator < Minitest::Test
 
         def setup
-          @generator = ModelCodeGenerator.new(DatabaseReflection::Relation.new(:test_table, []))
+          @generator = ModelCodeGenerator.new(Mart::Relation.new(:test_table, []))
         end
 
         ##############################################################################################################
@@ -18,11 +18,11 @@ module Grape::Trellis
         end
 
         def many_to_one_ass(rel, foreign_key, foreign_table, primary_key=:id)
-          DatabaseReflection::ManyToOneAssociation.new DatabaseReflection::ForeignKeyFinder::ForeignKeyInfo.new(rel, foreign_key, foreign_table, primary_key)
+          Mart::ManyToOneAssociation.construct(rel, foreign_key, foreign_table, primary_key)
         end
 
         def one_to_many_ass(rel, foreign_key, foreign_table, primary_key=:id)
-          DatabaseReflection::OneToManyAssociation.new DatabaseReflection::ForeignKeyFinder::ForeignKeyInfo.new(rel, foreign_key, foreign_table, primary_key)
+          Mart::OneToManyAssociation.construct(rel, foreign_key, foreign_table, primary_key)
         end
 
 

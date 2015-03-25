@@ -24,7 +24,7 @@ module Grape
 
           def code_for_association(ass)
             r = "#{ass.type} :#{ass.name}"
-            r << ", class: :#{model_class_name(ass.associated_table)}, key: :#{ass.foreign_key}" unless ass.conventional_foreign_key?
+            r << ", class: :#{model_class_name(ass.associated_table)}, key: :#{ass.foreign_key}" unless ass.name_is_conventional?
             # primary_key always defaults to the primary key of the referenced table
             r
           end
@@ -33,16 +33,15 @@ module Grape
           #   many_to_many :badges, left_key: :user_id, right_key: :badge_id, join_table: :badge_users
           #
           def code_for_join_association(join_ass)
-            ass_to_me, ass_to_other = join_ass.direct_associations
-
             r = "#{join_ass.type} :#{join_ass.name}"
-            r << ", class: :#{model_class_name(join_ass.associated_table)}" unless join_ass.name == join_ass.associated_table
-            r << ", right_key: :#{ass_to_other.foreign_key}" unless join_ass.name == join_ass.associated_table && ass_to_other.conventional_foreign_key?
-            r << ", left_key: :#{ass_to_me.foreign_key}" unless ass_to_me.conventional_foreign_key?
-            r << ", join_table: :#{join_ass.child_table}"
+            r << ", class: :#{model_class_name(join_ass.associated_table)}" unless join_ass.name_is_conventional?
+            r << ", right_key: :#{join_ass.right_foreign_key}" unless join_ass.name_and_right_foreign_key_are_conventional?
+            r << ", left_key: :#{join_ass.left_foreign_key}" unless join_ass.left_foreign_key_is_conventional?
+            r << ", join_table: :#{join_ass.join_table}"
             # primary_key always defaults to the primary key of the referenced table
             r
           end
+
 
           def require_code
             ["require 'models/#{filename}'"]

@@ -23,13 +23,11 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'activesupport'
 
   # Need sequel and pg for database reflection
-  spec.add_dependency 'sequel'
   spec.add_dependency 'pg'
+  spec.add_dependency 'sequel'
   spec.add_dependency 'sequel_pg'  # require: 'sequel'
 
-  # May need these, maybe not
-  # spec.add_dependency 'grape'
-  # spec.add_dependency 'grape-entity'
+  spec.add_dependency 'mart'
 
   spec.add_dependency 'thor'
 
