@@ -17,12 +17,19 @@ module Grape::Trellis
           @generator.code_for_association(ass)
         end
 
-        def many_to_one_ass(rel, foreign_key, foreign_table, primary_key=:id)
-          Mart::ManyToOneAssociation.construct(rel, foreign_key, foreign_table, primary_key)
+        def many_to_one_ass(child_table, foreign_key, parent_table, primary_key=:id)
+          Mart::ManyToOneAssociation.new(child_table: child_table,
+                                         foreign_key: foreign_key,
+                                         parent_table: parent_table,
+                                         primary_key: primary_key)
+
         end
 
-        def one_to_many_ass(rel, foreign_key, foreign_table, primary_key=:id)
-          Mart::OneToManyAssociation.construct(rel, foreign_key, foreign_table, primary_key)
+        def one_to_many_ass(child_table, foreign_key, parent_table, primary_key=:id)
+          Mart::OneToManyAssociation.new(child_table: child_table,
+                                         foreign_key: foreign_key,
+                                         parent_table: parent_table,
+                                         primary_key: primary_key)
         end
 
 
