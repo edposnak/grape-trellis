@@ -21,7 +21,7 @@ module Grape
             reflection_options = options.slice(*VALID_REFLECTION_OPTIONS)
 
             reflector = Mart::Reflection::Reflector.new(database_url)
-            relations = reflector.reflect_on_database(reflection_options)
+            relations = reflector.get_relations_for_code_gen(reflection_options)
             types_to_generate = Array(options[:types] || [:models, :api])
 
             types_to_generate.each do |type|

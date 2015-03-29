@@ -4,9 +4,10 @@ require 'active_support/inflector'
 require 'active_support/core_ext/string/inflections'
 require 'active_support/core_ext/hash'
 
-require 'mart/reflection'
 require 'sequel'
 require 'thor'
+
+require 'mart/sequel_table_reflection'
 
 require 'grape_trellis/version'
 require 'grape_trellis/generators'
