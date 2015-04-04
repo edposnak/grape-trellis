@@ -18,18 +18,17 @@ module Grape::Trellis
         end
 
         def many_to_one_ass(child_table, foreign_key, parent_table, primary_key=:id)
-          Mart::ManyToOneAssociation.new(child_table: child_table,
-                                         foreign_key: foreign_key,
-                                         parent_table: parent_table,
-                                         primary_key: primary_key)
-
+          Mart::NamingConventions::ManyToOneAssociation.new(child_table:  child_table,
+                                                            foreign_key:  foreign_key,
+                                                            parent_table: parent_table,
+                                                            primary_key:  primary_key)
         end
 
         def one_to_many_ass(child_table, foreign_key, parent_table, primary_key=:id)
-          Mart::OneToManyAssociation.new(child_table: child_table,
-                                         foreign_key: foreign_key,
-                                         parent_table: parent_table,
-                                         primary_key: primary_key)
+          Mart::NamingConventions::OneToManyAssociation.new(child_table:  child_table,
+                                                            foreign_key:  foreign_key,
+                                                            parent_table: parent_table,
+                                                            primary_key:  primary_key)
         end
 
 

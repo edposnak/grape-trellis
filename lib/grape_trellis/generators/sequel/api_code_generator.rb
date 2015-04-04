@@ -26,8 +26,10 @@ module Grape
               ["  resource :#{res} do"] +
               ['       '] +
               ['    helpers do'] +
-              ["      def #{res}"] +
-              ["        GrapePGJSON.resource :#{res}"] +
+              ["      def default_query"] +
+              ["        JSON.generate(json: ["] +
+              ['                              # specify JSON fields here'] +
+              ["                            ])"] +
               ['      end'] +
               ['    end'] +
               ['       '] +
@@ -35,6 +37,7 @@ module Grape
               ['    # REST endpoints'] +
               ["    desc 'index'"] +
               ["    get '/' do"] +
+              ["      Jaql.resource(scope).index(default_query)"]
               ['    end'] +
               ['       '] +
               ["    desc 'show'"] +
