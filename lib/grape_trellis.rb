@@ -7,7 +7,7 @@ require 'active_support/core_ext/hash'
 require 'sequel'
 require 'thor'
 
-require 'mart/sequel_table_reflection'
+require 'smart/sequel_table_reflection'
 
 require 'grape_trellis/version'
 require 'grape_trellis/generators'

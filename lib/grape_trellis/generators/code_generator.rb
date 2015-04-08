@@ -11,6 +11,14 @@ module Grape
           @resource = resource
           @options  = options
         end
+
+        private
+
+        def model_class_name(table_name=nil)
+          table_name ||= resource.table_name
+          table_name.to_s.camelize.singularize
+        end
+
       end
     end
   end

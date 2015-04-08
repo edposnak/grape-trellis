@@ -27,7 +27,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'sequel'
   spec.add_dependency 'sequel_pg'  # require: 'sequel'
 
-  spec.add_dependency 'mart'
+  spec.add_dependency 'smart'
 
   spec.add_dependency 'thor'
 

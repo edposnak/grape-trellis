@@ -7,7 +7,7 @@ module Grape::Trellis
       class TestModelCodeGenerator < Minitest::Test
 
         def setup
-          @generator = ModelCodeGenerator.new(Mart::Relation.new(:test_table, []))
+          @generator = ModelCodeGenerator.new(Smart::Relation.new(:test_table, []))
         end
 
         ##############################################################################################################
@@ -18,19 +18,22 @@ module Grape::Trellis
         end
 
         def many_to_one_ass(child_table, foreign_key, parent_table, primary_key=:id)
-          Mart::NamingConventions::ManyToOneAssociation.new(child_table:  child_table,
-                                                            foreign_key:  foreign_key,
-                                                            parent_table: parent_table,
-                                                            primary_key:  primary_key)
+          Smart::NamingConventions::ManyToOneAssociation.new(child_table:  child_table,
+                                                             foreign_key:  foreign_key,
+                                                             parent_table: parent_table,
+                                                             primary_key:  primary_key)
         end
 
         def one_to_many_ass(child_table, foreign_key, parent_table, primary_key=:id)
-          Mart::NamingConventions::OneToManyAssociation.new(child_table:  child_table,
-                                                            foreign_key:  foreign_key,
-                                                            parent_table: parent_table,
-                                                            primary_key:  primary_key)
+          Smart::NamingConventions::OneToManyAssociation.new(child_table:  child_table,
+                                                             foreign_key:  foreign_key,
+                                                             parent_table: parent_table,
+                                                             primary_key:  primary_key)
         end
 
+        def many_to_many_ass(ass_to_me, ass_to_other)
+          Smart::NamingConventions::ManyToManyAssociation.new ass_to_me, ass_to_other
+        end
 
         def test_many_to_one_with_conventional_key
           assert_equal 'many_to_one :group',
@@ -71,11 +74,31 @@ module Grape::Trellis
         end
 
         def test_many_to_many_with_conventional_keys
-          skip 'pass me!'
+          left_ass = many_to_one_ass(:groups_users, :user_id, :users, :id)
+          right_ass = many_to_one_ass(:groups_users, :group_id, :groups, :id)
+          assert_equal "many_to_many :groups, join_table: :groups_users",
+                       code_for_join_association(many_to_many_ass(left_ass, right_ass))
         end
 
-        def test_many_to_many_with_unconventional_key
-          skip 'pass me!'
+        def test_many_to_many_with_unconventional_left_key
+          left_ass = many_to_one_ass(:groups_users, :member_id, :users, :id)
+          right_ass = many_to_one_ass(:groups_users, :group_id, :groups, :id)
+          assert_equal "many_to_many :groups, left_key: :member_id, join_table: :groups_users",
+                       code_for_join_association(many_to_many_ass(left_ass, right_ass))
+        end
+
+        def test_many_to_many_with_unconventional_right_key
+          left_ass = many_to_one_ass(:groups_users, :user_id, :users, :id)
+          right_ass = many_to_one_ass(:groups_users, :team_id, :groups, :id)
+          assert_equal "many_to_many :teams, class: :Group, right_key: :team_id, join_table: :groups_users",
+                       code_for_join_association(many_to_many_ass(left_ass, right_ass))
+        end
+
+        def test_many_to_many_with_unconventional_left_and_right_key
+          left_ass = many_to_one_ass(:groups_users, :member_id, :users, :id)
+          right_ass = many_to_one_ass(:groups_users, :team_id, :groups, :id)
+          assert_equal "many_to_many :teams, class: :Group, right_key: :team_id, left_key: :member_id, join_table: :groups_users",
+                       code_for_join_association(many_to_many_ass(left_ass, right_ass))
         end
 
       end
