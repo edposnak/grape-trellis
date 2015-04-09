@@ -2,4 +2,4 @@ source 'https://rubygems.org'
 
 gemspec
 
-gem 'smart', path: '../smart'
+gem 'dart', path: '../dart'

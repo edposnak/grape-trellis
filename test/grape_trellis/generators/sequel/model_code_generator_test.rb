@@ -7,7 +7,7 @@ module Grape::Trellis
       class TestModelCodeGenerator < Minitest::Test
 
         def setup
-          @generator = ModelCodeGenerator.new(Smart::Relation.new(:test_table, []))
+          @generator = ModelCodeGenerator.new(Dart::Relation.new(:test_table, []))
         end
 
         ##############################################################################################################
@@ -18,21 +18,21 @@ module Grape::Trellis
         end
 
         def many_to_one_ass(child_table, foreign_key, parent_table, primary_key=:id)
-          Smart::NamingConventions::ManyToOneAssociation.new(child_table:  child_table,
-                                                             foreign_key:  foreign_key,
-                                                             parent_table: parent_table,
-                                                             primary_key:  primary_key)
+          Dart::NamingConventions::ManyToOneAssociation.new(child_table:  child_table,
+                                                            foreign_key:  foreign_key,
+                                                            parent_table: parent_table,
+                                                            primary_key:  primary_key)
         end
 
         def one_to_many_ass(child_table, foreign_key, parent_table, primary_key=:id)
-          Smart::NamingConventions::OneToManyAssociation.new(child_table:  child_table,
-                                                             foreign_key:  foreign_key,
-                                                             parent_table: parent_table,
-                                                             primary_key:  primary_key)
+          Dart::NamingConventions::OneToManyAssociation.new(child_table:  child_table,
+                                                            foreign_key:  foreign_key,
+                                                            parent_table: parent_table,
+                                                            primary_key:  primary_key)
         end
 
         def many_to_many_ass(ass_to_me, ass_to_other)
-          Smart::NamingConventions::ManyToManyAssociation.new ass_to_me, ass_to_other
+          Dart::NamingConventions::ManyToManyAssociation.new ass_to_me, ass_to_other
         end
 
         def test_many_to_one_with_conventional_key
