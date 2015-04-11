@@ -1,13 +1,17 @@
 require_relative '../../../test_helper'
 
+require 'dart/database'
+require 'dart/database/test_helpers'
+
 module Grape::Trellis
   module Generators
     module Sequel
 
       class TestModelCodeGenerator < Minitest::Test
+        include Dart::Database::TestHelpers
 
         def setup
-          @generator = ModelCodeGenerator.new(Dart::Relation.new(:test_table, []))
+          @generator = ModelCodeGenerator.new(relation(:test_table, []))
         end
 
         ##############################################################################################################
@@ -17,52 +21,34 @@ module Grape::Trellis
           @generator.code_for_association(ass)
         end
 
-        def many_to_one_ass(child_table, foreign_key, parent_table, primary_key=:id)
-          Dart::NamingConventions::ManyToOneAssociation.new(child_table:  child_table,
-                                                            foreign_key:  foreign_key,
-                                                            parent_table: parent_table,
-                                                            primary_key:  primary_key)
-        end
-
-        def one_to_many_ass(child_table, foreign_key, parent_table, primary_key=:id)
-          Dart::NamingConventions::OneToManyAssociation.new(child_table:  child_table,
-                                                            foreign_key:  foreign_key,
-                                                            parent_table: parent_table,
-                                                            primary_key:  primary_key)
-        end
-
-        def many_to_many_ass(ass_to_me, ass_to_other)
-          Dart::NamingConventions::ManyToManyAssociation.new ass_to_me, ass_to_other
-        end
-
         def test_many_to_one_with_conventional_key
           assert_equal 'many_to_one :group',
-                       code_for_association(many_to_one_ass(:users, :group_id, :groups))
+                       code_for_association(many_to_one_ass(:users, :group_id, :groups, :id))
         end
 
         def test_many_to_one_with_unconventional_key
           assert_equal 'many_to_one :tribe, class: :Group, key: :tribe',
-                       code_for_association(many_to_one_ass(:users, :tribe, :groups))
+                       code_for_association(many_to_one_ass(:users, :tribe, :groups, :id))
         end
 
         def test_many_to_one_with_foreign_key_that_looks_like_a_conventional_key
           assert_equal 'many_to_one :football_team, class: :Group, key: :football_team_id',
-                       code_for_association(many_to_one_ass(:users, :football_team_id, :groups))
+                       code_for_association(many_to_one_ass(:users, :football_team_id, :groups, :id))
         end
 
         def test_one_to_many_with_unconventional_key
           assert_equal 'one_to_many :tribe_users, class: :User, key: :tribe',
-                       code_for_association(one_to_many_ass(:users, :tribe, :groups))
+                       code_for_association(one_to_many_ass(:users, :tribe, :groups, :id))
         end
 
         def test_one_to_many_with_unconventional_key_created_by
           assert_equal 'one_to_many :created_by_broadcasts, class: :Broadcast, key: :created_by',
-                       code_for_association(one_to_many_ass(:broadcasts, :created_by, :users))
+                       code_for_association(one_to_many_ass(:broadcasts, :created_by, :users, :id))
         end
 
         def test_one_to_many_with_foreign_key_that_looks_like_a_conventional_key
           assert_equal 'one_to_many :billing_manager_billing_accounts, class: :BillingAccount, key: :billing_manager_id',
-                       code_for_association(one_to_many_ass(:billing_accounts, :billing_manager_id, :users))
+                       code_for_association(one_to_many_ass(:billing_accounts, :billing_manager_id, :users, :id))
         end
 
 
