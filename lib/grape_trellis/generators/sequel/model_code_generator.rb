@@ -15,14 +15,14 @@ module Grape
           def code
             (
             ["class #{model_class_name} < Sequel::Model"] +
-              resource.direct_associations.sort_by(&:name).map { |ass| "  #{code_for_association(ass)}" } +
+              resource.direct_associations.sort_by(&:name).map { |ass| "  #{code_for_direct_association(ass)}" } +
               resource.join_associations.sort_by(&:name).map { |ass| "  #{code_for_join_association(ass)}" } +
               (options[:with_grape_entities] ? code_for_grape_entity : []) +
               ['end']
             ).join("\n")
           end
 
-          def code_for_association(ass)
+          def code_for_direct_association(ass)
             r = "#{ass.type} :#{ass.name}"
             r << ", class: :#{model_class_name(ass.associated_table)}, key: :#{ass.foreign_key}" unless ass.name_is_conventional?
             # primary_key always defaults to the primary key of the referenced table

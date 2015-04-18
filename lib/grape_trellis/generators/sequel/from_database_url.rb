@@ -7,7 +7,7 @@ module Grape
 
           # Example
           #
-          # Grape::Trellis::Generators::Sequel::FromDatabaseUrl.new.generate 'postgres://smcc@localhost:5432/smcc_development', 'lib', with_grape_entities: true, exclude_tables: /migration/
+          # Grape::Trellis::Generators::Sequel::FromDatabaseUrl.new.generate 'postgres://smcc@localhost:5432/iapps_development', 'lib', with_grape_entities: true, exclude_tables: /migration/
 
           # @param [String] database_url specifies database to connect to and reflect on
           # @param [String] target_dir where to put the generated code
